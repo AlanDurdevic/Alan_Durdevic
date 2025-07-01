@@ -6,7 +6,7 @@ app = FastAPI(title="TicketHub", description="Ticket Hub application", version="
 @app.get(
     "/"
 )
-async def get_tickets():
+async def get_hello_message():
     return "Hello from TicketHub"
 
 
