@@ -35,6 +35,15 @@ def _sample_user_data():
 def sample_user_data():
     return _sample_user_data()
 
+@pytest.fixture
+def sample_todo():
+    return {
+                "id": 1,
+                "todo": "Memorize a poem",
+                "completed": False,
+                "userId": 100,
+            }
+
 
 def _sample_todos():
     return {
@@ -144,3 +153,18 @@ class TestService:
         assert second_ticket.status == "closed"
         assert second_ticket.priority == "high"
         assert second_ticket.assignee == "testuser1"
+
+    @pytest.mark.asyncio
+    async def test_get_ticket(self, service, sample_todo):
+        mock = MagicMock()
+        mock.json.return_value = sample_todo
+        mock.raise_for_status.return_value = None
+
+        with patch.object(service.client, 'get', return_value=mock):
+            ticket = await service.get_ticket(1)
+
+            assert ticket.id == 1
+            assert ticket.title == "Memorize a poem"
+            assert ticket.status == "open"
+            assert ticket.priority == "medium"
+            assert ticket.assignee is None

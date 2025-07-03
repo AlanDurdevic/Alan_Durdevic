@@ -57,3 +57,12 @@ class Service:
                 continue
 
         return tickets
+
+    async def get_ticket(self, id: id) -> Optional[Ticket]:
+        try:
+            response = await self.client.get(f"{self.BASE_URL}/todos/{id}")
+            response.raise_for_status()
+            todo = response.json()
+            return await self.transform_todo_to_ticket(todo)
+        except Exception as e:
+            return None
