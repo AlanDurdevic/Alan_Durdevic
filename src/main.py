@@ -3,14 +3,22 @@ from service import Service
 from typing import Optional, Literal
 from models import PaginatedResponse, Ticket
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
+import logging
 
-app = FastAPI(title="TicketHub", description="Ticket Hub application", version="0.0.1")
+app = FastAPI(title="TicketHub", description="TicketHub application for Abysalto AI Academy ", version="0.0.1")
 
 service = Service()
+
+logger = logging.getLogger(__name__)
 
 
 def get_service() -> Service:
     return service
+
+
+@app.get("/health", tags=["Health"])
+async def health_check():
+    return {"status": "healthy", "service": "TicketHub"}
 
 
 @app.get(
@@ -58,6 +66,7 @@ async def get_tickets(
         )
 
     except Exception as e:
+        logger.error("Error fetching tickets")
         raise HTTPException(
             status_code=HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error fetching tickets: {str(e)}"
@@ -77,6 +86,7 @@ async def search_tickets(
         service: Service = Depends(get_service)
 ):
     try:
+
         all_tickets = await service.get_tickets()
 
         query_lower = q.lower()
@@ -101,6 +111,7 @@ async def search_tickets(
         )
 
     except Exception as e:
+        logger.error("Error searching tickets")
         raise HTTPException(
             status_code=HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error searching tickets: {str(e)}"
@@ -108,21 +119,23 @@ async def search_tickets(
 
 
 @app.get(
-    "/tickets/{id}",
+    "/tickets/{ticket_id}",
     response_model=Ticket,
     tags=["Tickets"],
     summary="Get ticket details by ID"
 )
-async def get_ticket(id: int,
+async def get_ticket(ticket_id: int,
                      service: Service = Depends(get_service)):
     try:
-        ticket = await service.get_ticket(id)
+        ticket = await service.get_ticket(ticket_id)
         if ticket is None:
+            logger.error(f"Ticket not found, ID={ticket_id}")
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Ticket not found")
         return ticket
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f"Error fetching ticket, ID={ticket_id}")
         raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
