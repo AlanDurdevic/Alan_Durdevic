@@ -1,6 +1,6 @@
 import httpx
 from typing import Dict, List, Any
-from src.models import *
+from models import *
 
 
 class Service:

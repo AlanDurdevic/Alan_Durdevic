@@ -1,7 +1,7 @@
 import pytest
 
-from src.models import User
-from src.service import Service
+from models import User
+from service import Service
 from unittest.mock import MagicMock, patch, AsyncMock
 
 
