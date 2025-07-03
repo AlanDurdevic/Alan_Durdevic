@@ -1,5 +1,5 @@
 import httpx
-from typing import Dict, List
+from typing import Dict, List, Any
 from src.models import *
 
 
@@ -24,7 +24,7 @@ class Service:
         except Exception as e:
             return {}
 
-    async def fetch_todos(self) -> List[any]:
+    async def fetch_todos(self) -> List[Any]:
         try:
             response = await self.client.get(f"{self.BASE_URL}/todos")
             response.raise_for_status()
@@ -32,3 +32,16 @@ class Service:
             return data.get("todos", [])
         except Exception as e:
             return []
+
+    async def transform_todo_to_ticket(self, todo: Dict[str, Any]) -> Ticket:
+        users = await self.fetch_users()
+
+        assignee = None
+        if todo.get("userId") and todo["userId"] in users:
+            user = users[int(todo["userId"])]
+            assignee = user.username
+
+        status = "closed" if todo["completed"] is True else "open"
+        priority_map = {0: "low", 1: "medium", 2: "high"}
+        priority = priority_map[(todo["id"]) % 3]
+        return Ticket(id=todo["id"], title=todo["todo"], status=status, priority=priority, assignee=assignee)
