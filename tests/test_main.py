@@ -1,10 +1,99 @@
+from unittest.mock import AsyncMock
+import pytest
 from fastapi.testclient import TestClient
-from src.main import app
+from main import app, get_service
+from service import Service
+from models import Ticket
 
-client = TestClient(app)
+
+@pytest.fixture
+def mock_service():
+    service = AsyncMock(spec=Service)
+    return service
 
 
-def test_hello_message():
-    response = client.get("/")
-    assert response.status_code == 200
-    assert response.json() == "Hello from TicketHub"
+@pytest.fixture
+def client(mock_service):
+    app.dependency_overrides[get_service] = lambda: mock_service
+    with TestClient(app) as client:
+        yield client, mock_service
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def sample_tickets():
+    return [
+        Ticket(
+            id=1,
+            title="Test ticket 1",
+            status="open",
+            priority="high",
+            assignee="testuser1",
+        ),
+        Ticket(
+            id=2,
+            title="Test ticket 2",
+            status="closed",
+            priority="medium",
+            assignee="testuser2",
+        )
+    ]
+
+
+class TestEndpoints:
+
+    def test_hello_message(self, client):
+        client, _ = client
+        response = client.get("/")
+        assert response.status_code == 200
+        assert response.json() == {"message": "Hello from TicketHub"}
+
+    def test_get_tickets(self, client, sample_tickets):
+        test_client, mock_service = client
+        mock_service.get_tickets.return_value = sample_tickets
+
+        response = test_client.get("/tickets")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["total"] == 2
+        assert data["page"] == 1
+        assert data["per_page"] == 10
+        assert len(data["items"]) == 2
+
+        first_ticket = data["items"][0]
+        assert first_ticket["id"] == 1
+        assert first_ticket["title"] == "Test ticket 1"
+        assert first_ticket["status"] == "open"
+
+    def test_get_ticket_ok(self, client, sample_tickets):
+        test_client, mock_service = client
+        mock_service.get_ticket.return_value = sample_tickets[0]
+
+        response = test_client.get("/tickets/1")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["id"] == 1
+        assert data["title"] == "Test ticket 1"
+        assert data["status"] == "open"
+        assert data["priority"] == "high"
+        assert data["assignee"] == "testuser1"
+
+    def test_get_ticket_not_found(self, client):
+        test_client, mock_service = client
+        mock_service.get_ticket.return_value = None
+
+        response = test_client.get("/tickets/999")
+        assert response.status_code == 404
+
+    def test_search_tickets(self, client, sample_tickets):
+        test_client, mock_service = client
+        mock_service.get_tickets.return_value = sample_tickets
+
+        response = test_client.get("/tickets/search?q=Test ticket 1")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["total"] == 1
+        assert data["items"][0]["title"] == "Test ticket 1"
