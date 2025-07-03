@@ -80,7 +80,7 @@ class TestService:
             assert users[2].username == "testuser2"
 
     @pytest.mark.asyncio
-    async def test_fetch_users(self, service, sample_todos):
+    async def test_fetch_todos(self, service, sample_todos):
         mock = MagicMock()
         mock.json.return_value = sample_todos
         mock.raise_for_status.return_value = None
@@ -115,6 +115,30 @@ class TestService:
         assert first_ticket.assignee is None
 
         second_ticket = await service.transform_todo_to_ticket(todos["todos"][1])
+        assert second_ticket.id == 20
+        assert second_ticket.title == "Watch a documentary"
+        assert second_ticket.status == "closed"
+        assert second_ticket.priority == "high"
+        assert second_ticket.assignee == "testuser1"
+
+    @pytest.mark.asyncio
+    async def test_get_tickets(self, service):
+        todos = _sample_todos()["todos"]
+        users_data = _sample_user_data()
+        users = {1: User(**users_data["users"][0]), 2: User(**users_data["users"][1])}
+        service.fetch_todos = AsyncMock(return_value=todos)
+        service.fetch_users = AsyncMock(return_value=users)
+
+        tickets = await service.get_tickets()
+
+        first_ticket = tickets[0]
+        assert first_ticket.id == 1
+        assert first_ticket.title == "Memorize a poem"
+        assert first_ticket.status == "open"
+        assert first_ticket.priority == "medium"
+        assert first_ticket.assignee is None
+
+        second_ticket = tickets[1]
         assert second_ticket.id == 20
         assert second_ticket.title == "Watch a documentary"
         assert second_ticket.status == "closed"

@@ -6,7 +6,7 @@ from src.models import *
 class Service:
     """Service for users and tickets"""
 
-    BASE_URL = "https://dumyjson.com"
+    BASE_URL = "https://dummyjson.com"
 
     def __init__(self):
         self.client = httpx.AsyncClient()
@@ -45,3 +45,15 @@ class Service:
         priority_map = {0: "low", 1: "medium", 2: "high"}
         priority = priority_map[(todo["id"]) % 3]
         return Ticket(id=todo["id"], title=todo["todo"], status=status, priority=priority, assignee=assignee)
+
+    async def get_tickets(self) -> List[Ticket]:
+        todos = await self.fetch_todos()
+        tickets = []
+        for todo in todos:
+            try:
+                ticket = await self.transform_todo_to_ticket(todo)
+                tickets.append(ticket)
+            except Exception as e:
+                continue
+
+        return tickets
