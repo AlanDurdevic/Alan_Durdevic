@@ -5,7 +5,7 @@ from models import PaginatedResponse, Ticket
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 import logging
 
-app = FastAPI(title="TicketHub", description="Ticket Hub application", version="0.0.1")
+app = FastAPI(title="TicketHub", description="TicketHub application for Abysalto AI Academy ", version="0.0.1")
 
 service = Service()
 
