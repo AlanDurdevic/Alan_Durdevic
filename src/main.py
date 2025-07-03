@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends, Query
 from service import Service
 from typing import Optional, Literal
-from models import PaginatedResponse
+from models import PaginatedResponse, Ticket
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
 app = FastAPI(title="TicketHub", description="Ticket Hub application", version="0.0.1")
@@ -22,6 +22,9 @@ async def get_hello_message():
 
 @app.get(
     "/tickets",
+    response_model=PaginatedResponse,
+    tags=["Tickets"],
+    summary="Get paginated list of tickets"
 )
 async def get_tickets(
         page: int = Query(1, ge=1, description="Page number"),
@@ -63,6 +66,9 @@ async def get_tickets(
 
 @app.get(
     "/tickets/search",
+    response_model=PaginatedResponse,
+    tags=["Tickets"],
+    summary="Search tickets by title"
 )
 async def search_tickets(
         q: str = Query(".", min_length=1, description="Search query"),
@@ -102,7 +108,10 @@ async def search_tickets(
 
 
 @app.get(
-    "/tickets/{id}"
+    "/tickets/{id}",
+    response_model=Ticket,
+    tags=["Tickets"],
+    summary="Get ticket details by ID"
 )
 async def get_ticket(id: int,
                      service: Service = Depends(get_service)):
