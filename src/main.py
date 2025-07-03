@@ -7,18 +7,14 @@ service = Service()
 
 
 def get_service() -> Service:
-    if service is None:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Service not available"
-        )
     return service
+
 
 @app.get(
     "/"
 )
 async def get_hello_message():
-    return {"message" : "Hello from TicketHub"}
+    return {"message": "Hello from TicketHub"}
 
 
 @app.get(
