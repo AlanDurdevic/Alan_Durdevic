@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Literal, Optional
 
+
 class User(BaseModel):
     """User model"""
     id: int

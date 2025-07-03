@@ -1,5 +1,5 @@
 import httpx
-from typing import Dict
+from typing import Dict, List
 from src.models import *
 
 
@@ -23,3 +23,12 @@ class Service:
             return users
         except Exception as e:
             return {}
+
+    async def fetch_todos(self) -> List[any]:
+        try:
+            response = await self.client.get(f"{self.BASE_URL}/todos")
+            response.raise_for_status()
+            data = response.json()
+            return data.get("todos", [])
+        except Exception as e:
+            return []
