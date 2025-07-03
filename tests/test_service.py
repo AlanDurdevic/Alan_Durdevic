@@ -35,14 +35,15 @@ def _sample_user_data():
 def sample_user_data():
     return _sample_user_data()
 
+
 @pytest.fixture
 def sample_todo():
     return {
-                "id": 1,
-                "todo": "Memorize a poem",
-                "completed": False,
-                "userId": 100,
-            }
+        "id": 1,
+        "todo": "Memorize a poem",
+        "completed": False,
+        "userId": 100,
+    }
 
 
 def _sample_todos():

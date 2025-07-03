@@ -15,3 +15,12 @@ class Ticket(BaseModel):
     status: Literal["open", "closed"]
     priority: Literal["low", "medium", "high"]
     assignee: Optional[str] = None
+
+
+class PaginatedResponse(BaseModel):
+    """Generic paginated response"""
+    items: list
+    total: int
+    page: int
+    per_page: int
+    pages: int

@@ -42,13 +42,31 @@ def sample_tickets():
 
 class TestEndpoints:
 
-    def test_home(self, client: TestClient):
+    def test_hello_message(self, client):
         client, _ = client
         response = client.get("/")
         assert response.status_code == 200
         assert response.json() == {"message": "Hello from TicketHub"}
 
-    def test_get_ticket_ok(self, client: TestClient, sample_tickets):
+    def test_get_tickets(self, client, sample_tickets):
+        test_client, mock_service = client
+        mock_service.get_tickets.return_value = sample_tickets
+
+        response = test_client.get("/tickets")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["total"] == 2
+        assert data["page"] == 1
+        assert data["per_page"] == 10
+        assert len(data["items"]) == 2
+
+        first_ticket = data["items"][0]
+        assert first_ticket["id"] == 1
+        assert first_ticket["title"] == "Test ticket 1"
+        assert first_ticket["status"] == "open"
+
+    def test_get_ticket_ok(self, client, sample_tickets):
         test_client, mock_service = client
         mock_service.get_ticket.return_value = sample_tickets[0]
 
