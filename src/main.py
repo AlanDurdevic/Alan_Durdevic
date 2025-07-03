@@ -62,9 +62,50 @@ async def get_tickets(
 
 
 @app.get(
+    "/tickets/search",
+)
+async def search_tickets(
+        q: str = Query(".", min_length=1, description="Search query"),
+        page: int = Query(1, ge=1, description="Page number"),
+        per_page: int = Query(10, ge=1, le=100, description="Items per page"),
+        service: Service = Depends(get_service)
+):
+    try:
+        all_tickets = await service.get_tickets()
+
+        query_lower = q.lower()
+        filtered_tickets = [
+            t for t in all_tickets
+            if query_lower in t.title.lower()
+        ]
+
+        total = len(filtered_tickets)
+        start_idx = (page - 1) * per_page
+        end_idx = start_idx + per_page
+        tickets_page = filtered_tickets[start_idx:end_idx]
+
+        pages = (total + per_page - 1) // per_page
+
+        return PaginatedResponse(
+            items=tickets_page,
+            total=total,
+            page=page,
+            per_page=per_page,
+            pages=pages
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error searching tickets: {str(e)}"
+        )
+
+
+@app.get(
     "/tickets/{id}"
 )
-async def get_ticket(id: int, service: Service = Depends(get_service)):
+async def get_ticket(id: int,
+                     service: Service = Depends(get_service)):
     try:
         ticket = await service.get_ticket(id)
         if ticket is None:

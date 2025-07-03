@@ -86,3 +86,14 @@ class TestEndpoints:
 
         response = test_client.get("/tickets/999")
         assert response.status_code == 404
+
+    def test_search_tickets(self, client, sample_tickets):
+        test_client, mock_service = client
+        mock_service.get_tickets.return_value = sample_tickets
+
+        response = test_client.get("/tickets/search?q=Test ticket 1")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["total"] == 1
+        assert data["items"][0]["title"] == "Test ticket 1"
