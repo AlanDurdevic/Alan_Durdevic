@@ -1,6 +1,9 @@
 import httpx
 from typing import Dict, List, Any
 from models import *
+import logging
+
+logger = logging.getLogger()
 
 
 class Service:
@@ -22,6 +25,7 @@ class Service:
                 users[user.id] = user
             return users
         except Exception as e:
+            logger.error(f"Error fetching users: {e}")
             return {}
 
     async def fetch_todos(self) -> List[Any]:
@@ -31,6 +35,7 @@ class Service:
             data = response.json()
             return data.get("todos", [])
         except Exception as e:
+            logger.error(f"Error fetching todos: {e}")
             return []
 
     async def transform_todo_to_ticket(self, todo: Dict[str, Any]) -> Ticket:
@@ -54,15 +59,17 @@ class Service:
                 ticket = await self.transform_todo_to_ticket(todo)
                 tickets.append(ticket)
             except Exception as e:
+                logger.error(f"Error transforming todo: {e}")
                 continue
 
         return tickets
 
-    async def get_ticket(self, id: id) -> Optional[Ticket]:
+    async def get_ticket(self, ticket_id: id) -> Optional[Ticket]:
         try:
-            response = await self.client.get(f"{self.BASE_URL}/todos/{id}")
+            response = await self.client.get(f"{self.BASE_URL}/todos/{ticket_id}")
             response.raise_for_status()
             todo = response.json()
             return await self.transform_todo_to_ticket(todo)
         except Exception as e:
+            logger.error(f"Error fetching ticket {ticket_id}: {e}")
             return None
