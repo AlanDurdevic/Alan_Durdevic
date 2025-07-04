@@ -3,11 +3,20 @@ import pytest
 from schemas import User, Ticket
 from service import Service
 from unittest.mock import MagicMock, patch, AsyncMock
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from main import Base
 
+TEST_DATABASE_URL = "sqlite:///:memory:"
+
+engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
+TestingSessionLocal = sessionmaker(bind=engine)
+
+Base.metadata.create_all(bind=engine)
 
 @pytest.fixture
 def service():
-    return Service()
+    return Service(db_session_factory=TestingSessionLocal)
 
 
 def _sample_user_data():
