@@ -1,23 +1,37 @@
 from unittest.mock import AsyncMock
 import pytest
 from fastapi.testclient import TestClient
-from main import app, get_service
+from main import app, Base, get_db
 from service import Service
 from schemas import Ticket, TicketStats
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+TEST_DATABASE_URL = "sqlite:///:memory:"
+
+engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
+TestingSessionLocal = sessionmaker(bind=engine)
+
+Base.metadata.create_all(bind=engine)
+
+service = AsyncMock(spec=Service)
+app.state.service = service
+
+
+def override_get_db():
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+app.dependency_overrides[get_db] = override_get_db
 
 
 @pytest.fixture
-def mock_service():
-    service = AsyncMock(spec=Service)
-    return service
-
-
-@pytest.fixture
-def client(mock_service):
-    app.dependency_overrides[get_service] = lambda: mock_service
-    with TestClient(app) as client:
-        yield client, mock_service
-    app.dependency_overrides.clear()
+def client():
+    return TestClient(app), service
 
 
 @pytest.fixture
