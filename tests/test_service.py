@@ -14,6 +14,7 @@ TestingSessionLocal = sessionmaker(bind=engine)
 
 Base.metadata.create_all(bind=engine)
 
+
 @pytest.fixture
 def service():
     return Service(db_session_factory=TestingSessionLocal)
