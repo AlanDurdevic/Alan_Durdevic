@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Literal, Optional
+from typing import Literal, Optional, Dict
 
 
 class User(BaseModel):
@@ -24,3 +24,10 @@ class PaginatedResponse(BaseModel):
     page: int
     per_page: int
     pages: int
+
+
+class TicketStats(BaseModel):
+    """Ticket statistics model"""
+    total_tickets: int
+    priority_breakdown: Dict[str, int]
+    status_breakdown: Dict[str, int]

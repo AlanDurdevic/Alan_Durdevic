@@ -3,7 +3,7 @@ import pytest
 from fastapi.testclient import TestClient
 from main import app, get_service
 from service import Service
-from models import Ticket
+from models import Ticket, TicketStats
 
 
 @pytest.fixture
@@ -40,7 +40,7 @@ def sample_tickets():
     ]
 
 
-class TestEndpoints:
+class TestHealthAndRootEndpoints:
 
     def test_health(self, client):
         client, _ = client
@@ -52,6 +52,9 @@ class TestEndpoints:
         response = client.get("/")
         assert response.status_code == 200
         assert response.json() == {"message": "Hello from TicketHub"}
+
+
+class TestTicketEndpoints:
 
     def test_get_tickets(self, client, sample_tickets):
         test_client, mock_service = client
@@ -102,3 +105,29 @@ class TestEndpoints:
         data = response.json()
         assert data["total"] == 1
         assert data["items"][0]["title"] == "Test ticket 1"
+
+
+class TestStatsEndpoints:
+
+    def test_get_stats(self, client, sample_tickets):
+        test_client, mock_service = client
+
+        expected_stats = TicketStats(
+            total_tickets=2,
+            priority_breakdown={"high": 1, "medium": 1, "low": 0},
+            status_breakdown={"open": 1, "closed": 1}
+        )
+
+        mock_service.get_tickets.return_value = sample_tickets
+        mock_service.calculate_stats.return_value = expected_stats
+
+        response = test_client.get("/stats")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["total_tickets"] == 2
+        assert data["status_breakdown"]["open"] == 1
+        assert data["status_breakdown"]["closed"] == 1
+        assert data["priority_breakdown"]["high"] == 1
+        assert data["priority_breakdown"]["medium"] == 1
+        assert data["priority_breakdown"]["low"] == 0

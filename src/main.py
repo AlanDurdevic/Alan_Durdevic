@@ -1,19 +1,19 @@
 from fastapi import FastAPI, HTTPException, Depends, Query
 from service import Service
 from typing import Optional, Literal
-from models import PaginatedResponse, Ticket
+from models import PaginatedResponse, Ticket, TicketStats
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 import logging
 
 app = FastAPI(title="TicketHub", description="TicketHub application for Abysalto AI Academy ", version="0.0.1")
 
-service = Service()
+app_service = Service()
 
 logger = logging.getLogger(__name__)
 
 
 def get_service() -> Service:
-    return service
+    return app_service
 
 
 @app.get("/health", tags=["Health"])
@@ -137,6 +137,28 @@ async def get_ticket(ticket_id: int,
     except Exception as e:
         logger.error(f"Error fetching ticket, ID={ticket_id}")
         raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@app.get(
+    "/stats",
+    response_model=TicketStats,
+    tags=["Statistics"],
+    summary="Get ticket statistics"
+)
+async def get_ticket_stats(
+    service: Service = Depends(get_service)
+):
+    try:
+        tickets = await service.get_tickets()
+        stats = await service.calculate_stats(tickets)
+        return stats
+
+    except Exception as e:
+        logger.error(f"Error calculating stats: {e}")
+        raise HTTPException(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error calculating statistics: {str(e)}"
+        )
 
 
 if __name__ == "__main__":

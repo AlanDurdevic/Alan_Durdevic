@@ -1,6 +1,6 @@
 import pytest
 
-from models import User
+from models import User, Ticket
 from service import Service
 from unittest.mock import MagicMock, patch, AsyncMock
 
@@ -169,3 +169,21 @@ class TestService:
             assert ticket.status == "open"
             assert ticket.priority == "medium"
             assert ticket.assignee is None
+
+    @pytest.mark.asyncio
+    async def test_calculate_stats(self, service):
+        tickets = [
+            Ticket(id=1, title="T1", status="open", priority="high", assignee="u1"),
+            Ticket(id=2, title="T2", status="open", priority="medium", assignee="u2"),
+            Ticket(id=3, title="T3", status="closed", priority="low", assignee="u3"),
+            Ticket(id=4, title="T4", status="closed", priority="high", assignee="u1"),
+        ]
+
+        stats = await service.calculate_stats(tickets)
+
+        assert stats.total_tickets == 4
+        assert stats.priority_breakdown["high"] == 2
+        assert stats.priority_breakdown["medium"] == 1
+        assert stats.priority_breakdown["low"] == 1
+        assert stats.status_breakdown["open"] == 2
+        assert stats.status_breakdown["closed"] == 2
