@@ -2,7 +2,7 @@
 ## developer: Alan Đurđević
 ### version 1.0.0.
 
-#### Simple middleware REST service for collecting and presenting tickets from external sources
+#### Simple middleware REST service for collecting and presenting tickets from external sources.
 #### External sources:
 #### - https://dummyjson.com/todos
 #### - https://dummyjson.com/users
@@ -23,4 +23,4 @@
 - `http://localhost:8080/redoc`
 
 ## Additionally
-#### If you want to change database username, password and name change '.env' file
+#### If you want to change database username, password and name change '.env' file.
