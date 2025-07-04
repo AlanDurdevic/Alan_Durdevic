@@ -1,6 +1,6 @@
 import pytest
 
-from models import User, Ticket
+from schemas import User, Ticket
 from service import Service
 from unittest.mock import MagicMock, patch, AsyncMock
 

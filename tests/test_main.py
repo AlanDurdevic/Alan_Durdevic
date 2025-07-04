@@ -3,7 +3,7 @@ import pytest
 from fastapi.testclient import TestClient
 from main import app, get_service
 from service import Service
-from models import Ticket, TicketStats
+from schemas import Ticket, TicketStats
 
 
 @pytest.fixture

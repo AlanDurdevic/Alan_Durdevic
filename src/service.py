@@ -1,6 +1,6 @@
 import httpx
 from typing import List, Any
-from models import *
+from schemas import *
 import logging
 from aiocache import cached, Cache
 
