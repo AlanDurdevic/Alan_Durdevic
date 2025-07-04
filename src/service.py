@@ -20,24 +20,24 @@ class Service:
     @cached(ttl=60, cache=Cache.MEMORY)
     async def fetch_users(self) -> Dict[int, User]:
         db = self.db_session_factory()
+        users = {}
         try:
             response = await self.client.get(f"{self.BASE_URL}/users")
             response.raise_for_status()
             data = response.json()
-            users = {}
             for user_data in data.get("users", []):
                 user = User(**user_data)
                 users[user.id] = user
                 db_user = UserModel(**user.dict())
                 db.add(db_user)
             db.commit()
-            return users
         except Exception as e:
             db.rollback()
             logger.error(f"Error fetching users: {e}")
             return {}
         finally:
             db.close()
+            return users
 
     @cached(ttl=60, cache=Cache.MEMORY)
     async def fetch_todos(self) -> List[Any]:
@@ -55,7 +55,7 @@ class Service:
 
         assignee = None
         if todo.get("userId") and todo["userId"] in users:
-            user = users[int(todo["userId"])]
+            user = users[(todo["userId"])]
             assignee = user.username
 
         status = "closed" if todo["completed"] is True else "open"
