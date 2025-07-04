@@ -29,7 +29,5 @@ class PaginatedResponse(BaseModel):
 class TicketStats(BaseModel):
     """Ticket statistics model"""
     total_tickets: int
-    open_tickets: int
-    closed_tickets: int
     priority_breakdown: Dict[str, int]
     status_breakdown: Dict[str, int]

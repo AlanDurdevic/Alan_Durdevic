@@ -87,8 +87,6 @@ class Service:
 
         return TicketStats(
             total_tickets=total,
-            open_tickets=open_count,
-            closed_tickets=closed_count,
             priority_breakdown=priority_counts,
             status_breakdown=status_counts
         )

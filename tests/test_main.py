@@ -114,8 +114,6 @@ class TestStatsEndpoints:
 
         expected_stats = TicketStats(
             total_tickets=2,
-            open_tickets=1,
-            closed_tickets=1,
             priority_breakdown={"high": 1, "medium": 1, "low": 0},
             status_breakdown={"open": 1, "closed": 1}
         )
@@ -128,6 +126,8 @@ class TestStatsEndpoints:
 
         data = response.json()
         assert data["total_tickets"] == 2
-        assert data["open_tickets"] == 1
-        assert data["closed_tickets"] == 1
+        assert data["status_breakdown"]["open"] == 1
+        assert data["status_breakdown"]["closed"] == 1
         assert data["priority_breakdown"]["high"] == 1
+        assert data["priority_breakdown"]["medium"] == 1
+        assert data["priority_breakdown"]["low"] == 0

@@ -182,8 +182,6 @@ class TestService:
         stats = await service.calculate_stats(tickets)
 
         assert stats.total_tickets == 4
-        assert stats.open_tickets == 2
-        assert stats.closed_tickets == 2
         assert stats.priority_breakdown["high"] == 2
         assert stats.priority_breakdown["medium"] == 1
         assert stats.priority_breakdown["low"] == 1
