@@ -1,5 +1,5 @@
 import httpx
-from typing import Dict, List, Any
+from typing import List, Any
 from models import *
 import logging
 
