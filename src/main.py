@@ -15,6 +15,8 @@ from slowapi.middleware import SlowAPIMiddleware
 from slowapi.errors import RateLimitExceeded
 from models import *
 
+import os
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -44,7 +46,7 @@ app.add_middleware(SlowAPIMiddleware)
 # logger
 logger = logging.getLogger(__name__)
 
-DATABASE_URL = "postgresql://username:password@localhost:5432/database"
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 
 def get_service(request: Request) -> Service:
@@ -195,4 +197,4 @@ def paginate(items: List, page: int, per_page: int) -> PaginatedResponse:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("main:app", port=8080, reload=True)
+    uvicorn.run("main:app",  host="0.0.0.0", port=8080, reload=True)
