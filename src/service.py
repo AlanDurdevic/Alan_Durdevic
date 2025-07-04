@@ -73,3 +73,22 @@ class Service:
         except Exception as e:
             logger.error(f"Error fetching ticket {ticket_id}: {e}")
             return None
+
+    async def calculate_stats(self, tickets: List[Ticket]) -> TicketStats:
+        total = len(tickets)
+        open_count = sum(1 for t in tickets if t.status == "open")
+        closed_count = total - open_count
+
+        priority_counts = {"low": 0, "medium": 0, "high": 0}
+        for ticket in tickets:
+            priority_counts[ticket.priority] += 1
+
+        status_counts = {"open": open_count, "closed": closed_count}
+
+        return TicketStats(
+            total_tickets=total,
+            open_tickets=open_count,
+            closed_tickets=closed_count,
+            priority_breakdown=priority_counts,
+            status_breakdown=status_counts
+        )
