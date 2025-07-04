@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
 
     app.state.engine = engine
     app.state.SessionLocal = SessionLocal
-    app.state.service = Service()
+    app.state.service = Service(db_session_factory=SessionLocal)
 
     yield
 
