@@ -1,33 +1,10 @@
-from pydantic import BaseModel
-from typing import Literal, Optional, Dict
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
 
 
-class User(BaseModel):
-    """User model"""
-    id: int
-    username: str
-
-
-class Ticket(BaseModel):
-    """Ticket model"""
-    id: int
-    title: str
-    status: Literal["open", "closed"]
-    priority: Literal["low", "medium", "high"]
-    assignee: Optional[str] = None
-
-
-class PaginatedResponse(BaseModel):
-    """Generic paginated response"""
-    items: list
-    total: int
-    page: int
-    per_page: int
-    pages: int
-
-
-class TicketStats(BaseModel):
-    """Ticket statistics model"""
-    total_tickets: int
-    priority_breakdown: Dict[str, int]
-    status_breakdown: Dict[str, int]
+class UserModel(Base):
+    __tablename__ = 'user'
+    id = Column(Integer, primary_key=True)
+    username = Column(String(50), unique=True, nullable=False)

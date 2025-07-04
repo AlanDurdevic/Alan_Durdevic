@@ -1,8 +1,9 @@
 import httpx
 from typing import List, Any
-from models import *
+from schemas import *
 import logging
 from aiocache import cached, Cache
+from models import *
 
 logger = logging.getLogger()
 
@@ -12,11 +13,13 @@ class Service:
 
     BASE_URL = "https://dummyjson.com"
 
-    def __init__(self):
+    def __init__(self, db_session_factory):
         self.client = httpx.AsyncClient()
+        self.db_session_factory = db_session_factory
 
     @cached(ttl=60, cache=Cache.MEMORY)
     async def fetch_users(self) -> Dict[int, User]:
+        db = self.db_session_factory()
         try:
             response = await self.client.get(f"{self.BASE_URL}/users")
             response.raise_for_status()
@@ -25,10 +28,16 @@ class Service:
             for user_data in data.get("users", []):
                 user = User(**user_data)
                 users[user.id] = user
+                db_user = UserModel(**user.dict())
+                db.add(db_user)
+            db.commit()
             return users
         except Exception as e:
+            db.rollback()
             logger.error(f"Error fetching users: {e}")
             return {}
+        finally:
+            db.close()
 
     @cached(ttl=60, cache=Cache.MEMORY)
     async def fetch_todos(self) -> List[Any]:

@@ -1,7 +1,29 @@
 import pytest
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
 
-from main import app
+from main import app, get_db, Base, Service
+
+TEST_DATABASE_URL = "sqlite:///:memory:"
+
+engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
+TestingSessionLocal = sessionmaker(bind=engine)
+
+Base.metadata.create_all(bind=engine)
+
+app.state.service = Service(db_session_factory=TestingSessionLocal)
+
+
+def override_get_db():
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+app.dependency_overrides[get_db] = override_get_db
 
 
 @pytest.fixture
