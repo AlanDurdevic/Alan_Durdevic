@@ -59,4 +59,3 @@ def test_error_handling(client):
 
     invalid_priority = client.get("/tickets?priority=invalid")
     assert invalid_priority.status_code == 422
-
