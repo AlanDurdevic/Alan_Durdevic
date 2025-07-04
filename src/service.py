@@ -2,6 +2,7 @@ import httpx
 from typing import List, Any
 from models import *
 import logging
+from aiocache import cached, Cache
 
 logger = logging.getLogger()
 
@@ -14,6 +15,7 @@ class Service:
     def __init__(self):
         self.client = httpx.AsyncClient()
 
+    @cached(ttl=60, cache=Cache.MEMORY)
     async def fetch_users(self) -> Dict[int, User]:
         try:
             response = await self.client.get(f"{self.BASE_URL}/users")
@@ -28,6 +30,7 @@ class Service:
             logger.error(f"Error fetching users: {e}")
             return {}
 
+    @cached(ttl=60, cache=Cache.MEMORY)
     async def fetch_todos(self) -> List[Any]:
         try:
             response = await self.client.get(f"{self.BASE_URL}/todos")
