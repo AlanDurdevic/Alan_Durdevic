@@ -14,7 +14,7 @@
 ## Usage
 
 1. **Clone the repository:** `git clone https://github.com/AlanDurdevic/Alan_Durdevic.git`
-2. **Star the services:** `docker compose --env-file .env up --build`
+2. **Start the services:** `docker compose --env-file .env up --build`
 3. **Acces the application:**
 - Open your browser and go to `http://localhost:8080`
 
