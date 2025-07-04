@@ -2,7 +2,7 @@
 ## developer: Alan Đurđević
 ### version 1.0.0.
 
-#### Simple middleware REST service for collecting and presenting tickets
+#### Simple middleware REST service for collecting and presenting tickets from external sources
 #### External sources:
 #### - https://dummyjson.com/todos
 #### - https://dummyjson.com/users
