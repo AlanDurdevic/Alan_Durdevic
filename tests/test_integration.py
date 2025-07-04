@@ -46,3 +46,17 @@ def test_workflow(client):
     stats_data = stats_response.json()
     assert "total_tickets" in stats_data
     assert "priority_breakdown" in stats_data
+
+
+def test_error_handling(client):
+    # Test invalid ticket ID
+    invalid_ticket = client.get("/tickets/99999999")
+    assert invalid_ticket.status_code == 404
+
+    # Test invalid query parameters
+    invalid_status = client.get("/tickets?status=invalid")
+    assert invalid_status.status_code == 422
+
+    invalid_priority = client.get("/tickets?priority=invalid")
+    assert invalid_priority.status_code == 422
+
